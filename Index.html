@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorya Commerce - Complete E-Commerce Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts - Hanuman & Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@300;400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for Reports -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#1e1b4b',
+                        },
+                        aba: '#005a9c',
+                        khqr: '#e11d48'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Hanuman', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', 'Hanuman', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+        .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; font-weight: 600; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo & Brand -->
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleMobileSidebar()" class="lg:hidden text-slate-600 hover:text-slate-900 focus:outline-none">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    <div class="flex items-center gap-2 cursor-pointer" onclick="switchMainTab('store')">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-brand-500/20">
+                            S
+                        </div>
+                        <div>
+                            <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-600 to-indigo-800">SORYA</span>
+                            <span class="text-xs block text-slate-500 -mt-1 font-medium">STORE & ADMIN</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs (Store vs Admin vs Docs) -->
+                <nav class="hidden md:flex space-x-1 bg-slate-100 p-1 rounded-xl text-sm font-medium">
+                    <button id="nav-store" onclick="switchMainTab('store')" class="px-4 py-2 rounded-lg transition-all text-slate-700 bg-white shadow-sm font-semibold">
+                        <i class="fa-solid fa-store mr-1.5 text-brand-600"></i> Storefront
+                    </button>
+                    <button id="nav-admin" onclick="switchMainTab('admin')" class="px-4 py-2 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-chart-line mr-1.5 text-slate-500"></i> Admin Panel
+                    </button>
+                    <button id="nav-db" onclick="switchMainTab('db')" class="px-4 py-2 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-database mr-1.5 text-slate-500"></i> Database Schema
+                    </button>
+                    <button id="nav-docs" onclick="switchMainTab('docs')" class="px-4 py-2 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+                        <i class="fa-solid fa-code mr-1.5 text-slate-500"></i> Best Practices
+                    </button>
+                </nav>
+
+                <!-- Actions Right (Cart, User, Auth) -->
+                <div class="flex items-center space-x-3">
+                    <button onclick="openCartModal()" class="relative p-2.5 rounded-full text-slate-600 hover:bg-slate-100 transition-colors">
+                        <i class="fa-solid fa-cart-shopping text-lg"></i>
+                        <span id="cart-badge" class="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-bold leading-none text-white transform translate-x-1/3 -translate-y-1/3 bg-brand-600 rounded-full border-2 border-white">0</span>
+                    </button>
+
+                    <div id="user-menu-container" class="relative">
+                        <button onclick="toggleAuthModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-medium transition-all">
+                            <i class="fa-solid fa-circle-user text-lg text-brand-600"></i>
+                            <span id="user-name-display">ចូលប្រើ (Login)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ================= SECTION 1: STOREFRONT ================= -->
+        <section id="view-store" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="relative rounded-3xl bg-gradient-to-r from-brand-900 via-indigo-900 to-slate-900 text-white overflow-hidden p-8 sm:p-12 shadow-xl">
+                <div class="absolute right-0 top-0 bottom-0 w-1/2 opacity-20 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-400 via-brand-500 to-transparent"></div>
+                <div class="relative z-10 max-w-xl space-y-4">
+                    <span class="inline-block px-3 py-1 rounded-full bg-brand-500/30 border border-brand-400/30 text-brand-200 text-xs font-semibold tracking-wider uppercase">
+                        PROMOTION 50% OFF
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                        ទិញទំនិញអនឡាញទាន់សម័យ ប្រកបដោយទំនុកចិត្ត
+                    </h1>
+                    <p class="text-slate-300 text-sm sm:text-base">
+                        ស្វែងរកផលិតផលគុណភាពខ្ពស់ តម្លៃសមរម្យ ជាមួយប្រព័ន្ធទូទាត់រហ័ស KHQR & ABA PayWay។
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="scrollToProducts()" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-500 font-semibold text-white shadow-lg shadow-brand-600/30 transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-bag-shopping"></i> ទិញឥឡូវនេះ
+                        </button>
+                        <button onclick="switchMainTab('admin')" class="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold text-white backdrop-blur-sm border border-white/20 transition-all">
+                            <i class="fa-solid fa-gauge"></i> មើលប្រព័ន្ធ Admin
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search Bar & Filters -->
+            <div id="product-section" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
+                    <!-- Search Input -->
+                    <div class="relative w-full md:w-96">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="search-input" oninput="filterProducts()" placeholder="ស្វែងរកផលិតផលតាមឈ្មោះ..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 text-sm">
+                    </div>
+
+                    <!-- Category Pills -->
+                    <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0" id="category-pills">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Price and Sort Filters -->
+                <div class="flex flex-wrap items-center justify-between pt-3 border-t border-slate-100 text-sm gap-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-slate-500 text-xs font-semibold uppercase">តម្លៃ (Price):</span>
+                        <input type="range" id="price-range" min="0" max="2000" step="50" value="2000" oninput="filterProducts()" class="w-32 accent-brand-600">
+                        <span class="font-medium text-slate-700" id="price-range-val">≤ $2000</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-slate-500 text-xs font-semibold uppercase">តម្រៀប (Sort):</span>
+                        <select id="sort-select" onchange="filterProducts()" class="border border-slate-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <option value="featured">ការពេញនិយម (Popular)</option>
+                            <option value="low-high">តម្លៃ៖ ទាប ទៅ ខ្ពស់</option>
+                            <option value="high-low">តម្លៃ៖ ខ្ពស់ ទៅ ទាប</option>
+                            <option value="rating">ការវាយតម្លៃ (Rating)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Cards Grid -->
+            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Dynamic Products Rendered Here -->
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 2: ADMIN PANEL ================= -->
+        <section id="view-admin" class="hidden space-y-6">
+            <!-- Admin Header & Role Switcher -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900">ប្រព័ន្ធគ្រប់គ្រងអាជីវកម្ម (Admin Dashboard)</h2>
+                    <p class="text-slate-500 text-sm">គ្រប់គ្រងស្តុក ពិនិត្យបញ្ជាទិញ និងទាញយករបាយការណ៍លក់</p>
+                </div>
+
+                <!-- RBAC Simulation Control -->
+                <div class="flex items-center gap-3 bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+                    <span class="text-xs font-bold text-slate-500 uppercase px-2">Role:</span>
+                    <button onclick="setAdminRole('admin')" id="role-btn-admin" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white shadow-sm text-brand-600">
+                        Super Admin
+                    </button>
+                    <button onclick="setAdminRole('manager')" id="role-btn-manager" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600">
+                        Store Manager
+                    </button>
+                    <button onclick="setAdminRole('driver')" id="role-btn-driver" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600">
+                        Logistics/Driver
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metrics Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">ចំណូលសរុប (Revenue)</p>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1" id="stat-revenue">$12,450.00</h3>
+                        <span class="text-emerald-500 text-xs font-medium"><i class="fa-solid fa-arrow-up"></i> +14% ខែនេះ</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">ការបញ្ជាទិញ (Orders)</p>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1" id="stat-orders">148</h3>
+                        <span class="text-brand-500 text-xs font-medium"><i class="fa-solid fa-clock"></i> 12 កំពុងចាត់ចែង</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-box-archive"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">ទំនិញក្នុងស្តុក (Stock)</p>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1" id="stat-stock">540 pcs</h3>
+                        <span class="text-amber-500 text-xs font-medium"><i class="fa-solid fa-triangle-exclamation"></i> 2 ជិតអស់ស្តុក</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-cubes"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold text-slate-400 uppercase">អតិថិជន (Customers)</p>
+                        <h3 class="text-2xl font-bold text-slate-900 mt-1">1,204</h3>
+                        <span class="text-indigo-500 text-xs font-medium"><i class="fa-solid fa-user-plus"></i> +28 ថ្មីៗ</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Sub Tabs: Orders / Inventory / Reports -->
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="border-b border-slate-200 px-6 pt-4 flex space-x-6 text-sm font-semibold text-slate-500">
+                    <button id="admin-sub-orders" onclick="switchAdminSubTab('orders')" class="pb-4 text-brand-600 border-b-2 border-brand-600">
+                        <i class="fa-solid fa-list-check mr-1.5"></i> ការបញ្ជាទិញ (Orders)
+                    </button>
+                    <button id="admin-sub-inventory" onclick="switchAdminSubTab('inventory')" class="pb-4 hover:text-slate-800">
+                        <i class="fa-solid fa-boxes-stacked mr-1.5"></i> គ្រប់គ្រងស្តុក (Products)
+                    </button>
+                    <button id="admin-sub-reports" onclick="switchAdminSubTab('reports')" class="pb-4 hover:text-slate-800">
+                        <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> របាយការណ៍ (Reports & Analytics)
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <!-- Orders List View -->
+                    <div id="admin-subview-orders" class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-slate-800">បញ្ជីការបញ្ជាទិញចុងក្រោយ (Recent Orders)</h3>
+                            <button onclick="triggerTelegramAlert()" class="text-xs px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 font-semibold flex items-center gap-1.5 border border-sky-200">
+                                <i class="fa-brands fa-telegram"></i> Test Telegram Bot Notification
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+                                    <tr>
+                                        <th class="p-3 rounded-l-lg">Order ID</th>
+                                        <th class="p-3">អតិថិជន</th>
+                                        <th class="p-3">វិធីទូទាត់</th>
+                                        <th class="p-3">សរុប</th>
+                                        <th class="p-3">ស្ថានភាពការទូទាត់</th>
+                                        <th class="p-3">ស្ថានភាពដឹកជញ្ជូន</th>
+                                        <th class="p-3 rounded-r-lg">សកម្មភាព</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-table-body" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Orders -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Management View -->
+                    <div id="admin-subview-inventory" class="hidden space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800">បញ្ជីផលិតផលទាំងអស់</h3>
+                            <button onclick="openAddProductModal()" class="btn-role-restricted px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> បន្ថែមផលិតផលថ្មី
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm text-slate-600">
+                                <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+                                    <tr>
+                                        <th class="p-3 rounded-l-lg">រូបភាព</th>
+                                        <th class="p-3">ឈ្មោះផលិតផល</th>
+                                        <th class="p-3">ប្រភេទ</th>
+                                        <th class="p-3">តម្លៃ</th>
+                                        <th class="p-3">ស្តុកក្នុងឃ្លាំង</th>
+                                        <th class="p-3 rounded-r-lg">សកម្មភាព</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Inventory -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Reports & Analytics View -->
+                    <div id="admin-subview-reports" class="hidden space-y-6">
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <div class="flex items-center gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase">ចាប់ពីថ្ងៃ (From):</label>
+                                    <input type="date" value="2026-10-01" class="border border-slate-300 rounded-lg px-2.5 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase">ដល់ថ្ងៃ (To):</label>
+                                    <input type="date" value="2026-10-21" class="border border-slate-300 rounded-lg px-2.5 py-1 text-xs">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="exportReport('excel')" class="px-3 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-excel"></i> Export Excel (.XLSX)
+                                </button>
+                                <button onclick="exportReport('pdf')" class="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-pdf"></i> Export PDF Report
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sales Chart -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div class="lg:col-span-2 bg-white p-4 rounded-xl border border-slate-200">
+                                <h4 class="font-bold text-slate-800 text-sm mb-4">ប្រាក់ចំណូលតាមខែ (Revenue Trend)</h4>
+                                <div class="h-64">
+                                    <canvas id="salesChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-4">
+                                <h4 class="font-bold text-slate-800 text-sm">ប្រព័ន្ធទូទាត់ទូទៅ (Payment Gateways)</h4>
+                                <div class="space-y-3 text-xs">
+                                    <div>
+                                        <div class="flex justify-between font-semibold mb-1"><span>KHQR / ABA Pay</span><span>65%</span></div>
+                                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div class="bg-aba h-full w-[65%]"></div></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between font-semibold mb-1"><span>Cash on Delivery (COD)</span><span>25%</span></div>
+                                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div class="bg-amber-500 h-full w-[25%]"></div></div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between font-semibold mb-1"><span>Visa / Mastercard</span><span>10%</span></div>
+                                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden"><div class="bg-brand-600 h-full w-[10%]"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 3: DATABASE SCHEMA ================= -->
+        <section id="view-db" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">រចនាសម្ព័ន្ធមូលដ្ឋានទិន្នន័យ (Database Schema & ERD)</h2>
+                <p class="text-slate-500 text-sm">បង្ហាញពីទំនាក់ទំនងរវាង Tables ក្នុងប្រព័ន្ធ Relational Database (PostgreSQL / MySQL)</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    <!-- Users Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+                        <div class="bg-slate-800 text-white p-3 font-mono font-bold text-xs flex justify-between items-center">
+                            <span><i class="fa-solid fa-table mr-1.5 text-brand-400"></i> USERS</span>
+                            <span class="text-slate-400 font-normal">Primary Entity</span>
+                        </div>
+                        <ul class="p-3 text-xs space-y-2 font-mono">
+                            <li class="font-bold text-brand-600"><i class="fa-solid fa-key mr-1 text-amber-500"></i> user_id (UUID, PK)</li>
+                            <li>full_name (VARCHAR 100)</li>
+                            <li>email (VARCHAR 150, UNIQUE)</li>
+                            <li>password_hash (VARCHAR 255)</li>
+                            <li>role (ENUM: admin, manager, driver)</li>
+                            <li class="text-slate-400">created_at (TIMESTAMP)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Products Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+                        <div class="bg-slate-800 text-white p-3 font-mono font-bold text-xs flex justify-between items-center">
+                            <span><i class="fa-solid fa-table mr-1.5 text-brand-400"></i> PRODUCTS</span>
+                            <span class="text-slate-400 font-normal">Catalog</span>
+                        </div>
+                        <ul class="p-3 text-xs space-y-2 font-mono">
+                            <li class="font-bold text-brand-600"><i class="fa-solid fa-key mr-1 text-amber-500"></i> product_id (UUID, PK)</li>
+                            <li class="text-indigo-600"><i class="fa-solid fa-link mr-1"></i> category_id (INT, FK)</li>
+                            <li>name (VARCHAR 255)</li>
+                            <li>description (TEXT)</li>
+                            <li>price (DECIMAL 10,2)</li>
+                            <li>stock_quantity (INT)</li>
+                            <li class="text-slate-400">image_url (VARCHAR 500)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+                        <div class="bg-slate-800 text-white p-3 font-mono font-bold text-xs flex justify-between items-center">
+                            <span><i class="fa-solid fa-table mr-1.5 text-brand-400"></i> ORDERS</span>
+                            <span class="text-slate-400 font-normal">Transactions</span>
+                        </div>
+                        <ul class="p-3 text-xs space-y-2 font-mono">
+                            <li class="font-bold text-brand-600"><i class="fa-solid fa-key mr-1 text-amber-500"></i> order_id (UUID, PK)</li>
+                            <li class="text-indigo-600"><i class="fa-solid fa-link mr-1"></i> user_id (UUID, FK)</li>
+                            <li>total_amount (DECIMAL 10,2)</li>
+                            <li>payment_status (ENUM)</li>
+                            <li>shipping_status (ENUM)</li>
+                            <li class="text-slate-400">created_at (TIMESTAMP)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Order Items Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+                        <div class="bg-slate-800 text-white p-3 font-mono font-bold text-xs flex justify-between items-center">
+                            <span><i class="fa-solid fa-table mr-1.5 text-brand-400"></i> ORDER_ITEMS</span>
+                            <span class="text-slate-400 font-normal">Junction Table</span>
+                        </div>
+                        <ul class="p-3 text-xs space-y-2 font-mono">
+                            <li class="font-bold text-brand-600"><i class="fa-solid fa-key mr-1 text-amber-500"></i> order_item_id (UUID, PK)</li>
+                            <li class="text-indigo-600"><i class="fa-solid fa-link mr-1"></i> order_id (UUID, FK)</li>
+                            <li class="text-indigo-600"><i class="fa-solid fa-link mr-1"></i> product_id (UUID, FK)</li>
+                            <li>quantity (INT)</li>
+                            <li>price (DECIMAL 10,2)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Transactions Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+                        <div class="bg-slate-800 text-white p-3 font-mono font-bold text-xs flex justify-between items-center">
+                            <span><i class="fa-solid fa-table mr-1.5 text-brand-400"></i> TRANSACTIONS</span>
+                            <span class="text-slate-400 font-normal">Payments</span>
+                        </div>
+                        <ul class="p-3 text-xs space-y-2 font-mono">
+                            <li class="font-bold text-brand-600"><i class="fa-solid fa-key mr-1 text-amber-500"></i> transaction_id (UUID, PK)</li>
+                            <li class="text-indigo-600"><i class="fa-solid fa-link mr-1"></i> order_id (UUID, FK)</li>
+                            <li>payment_method (VARCHAR 50)</li>
+                            <li>amount (DECIMAL 10,2)</li>
+                            <li>status (ENUM)</li>
+                        </ul>
+                    </div>
+
+                    <!-- Categories Table -->
+                    <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50 shadow-sm">
+                        <div class="bg-slate-800 text-white p-3 font-mono font-bold text-xs flex justify-between items-center">
+                            <span><i class="fa-solid fa-table mr-1.5 text-brand-400"></i> CATEGORIES</span>
+                            <span class="text-slate-400 font-normal">Lookup</span>
+                        </div>
+                        <ul class="p-3 text-xs space-y-2 font-mono">
+                            <li class="font-bold text-brand-600"><i class="fa-solid fa-key mr-1 text-amber-500"></i> category_id (INT, PK)</li>
+                            <li>category_name (VARCHAR 100)</li>
+                            <li>slug (VARCHAR 100, UNIQUE)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 4: BEST PRACTICES ================= -->
+        <section id="view-docs" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">គន្លឹះ និងបច្ចេកទេសធ្វើឱ្យ Website មានលក្ខណៈល្អបំផុត</h2>
+                    <p class="text-slate-500 text-sm">ស្តង់ដារបច្ចេកវិទ្យាសម្រាប់ Performance, Security, Mobile Responsive & SEO</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex items-center gap-2 text-brand-600 font-bold">
+                            <i class="fa-solid fa-gauge-high text-lg"></i>
+                            <h3>1. Performance & Speed Optimization</h3>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            • ប្រើប្រាស់ **Redis Caching** សម្រាប់បកប្រែ Query ញឹកញាប់<br>
+                            • បំលែងរូបភាពជា **WebP/AVIF** format រួមជាមួយ Lazy Loading<br>
+                            • អនុវត្ត **Cloudflare CDN** សម្រាប់ល្បឿនចែកចាយទូទាំងពិភពលោក
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex items-center gap-2 text-emerald-600 font-bold">
+                            <i class="fa-solid fa-shield-halved text-lg"></i>
+                            <h3>2. Security Best Practices</h3>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            • Hash Password ដោយ **Argon2id** ឬ **bcrypt**<br>
+                            • ការពារ **SQL Injection** តាមរយៈ Prepared Statements/Prisma ORM<br>
+                            • កំណត់ **HTTPS, Rate Limiting** និង CORS rules
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex items-center gap-2 text-indigo-600 font-bold">
+                            <i class="fa-solid fa-mobile-screen-button text-lg"></i>
+                            <h3>3. Mobile-First & Responsive UX</h3>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            • រចនាឡើងផ្តោតលើទូរស័ព្ទដៃជាចម្បង (Mobile-First Layout)<br>
+                            • Touch targets ធំល្មមងាយស្រួលចុច (48px+) <br>
+                            • ប្រើប្រាស់ Tailwind Fluid Design Prefix (`sm:`, `md:`, `lg:`)
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex items-center gap-2 text-amber-600 font-bold">
+                            <i class="fa-solid fa-magnifying-glass-chart text-lg"></i>
+                            <h3>4. SEO Optimization</h3>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            • **Server-Side Rendering (SSR)** ដោយ Next.js ឬ Nuxt.js<br>
+                            • **Structured Data (JSON-LD)** សម្រាប់បង្ហាញ Snippets លើ Google<br>
+                            • Dynamic XML Sitemap ជាមួយ Robots.txt ត្រឹមត្រូវ
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= MODALS & OVERLAYS ================= -->
+
+    <!-- Product Details Modal -->
+    <div id="modal-product" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div id="modal-product-content" class="p-6 overflow-y-auto">
+                <!-- Dynamic Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Shopping Cart Modal -->
+    <div id="modal-cart" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between p-6">
+            <div>
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                    <h3 class="text-lg font-bold text-slate-900"><i class="fa-solid fa-bag-shopping text-brand-600 mr-2"></i>កន្ត្រកទំនិញរបស់អ្នក</h3>
+                    <button onclick="closeCartModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div id="cart-items-container" class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+                    <!-- Dynamic Cart Items -->
+                </div>
+            </div>
+
+            <div class="border-t border-slate-100 pt-4 space-y-4">
+                <div class="space-y-1.5 text-sm">
+                    <div class="flex justify-between text-slate-500"><span>តម្លៃទំនិញសរុប (Subtotal):</span><span id="cart-subtotal">$0.00</span></div>
+                    <div class="flex justify-between text-slate-500"><span>ថ្លៃដឹកជញ្ជូន (Delivery):</span><span class="text-emerald-600 font-semibold">FREE</span></div>
+                    <div class="flex justify-between text-base font-bold text-slate-900 pt-2 border-t border-slate-100"><span>សរុបចុងក្រោយ (Total):</span><span id="cart-total" class="text-brand-600">$0.00</span></div>
+                </div>
+
+                <button onclick="openCheckoutModal()" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-lg shadow-brand-600/30 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-credit-card"></i> បន្តទៅការទូទាត់ (Checkout)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div id="modal-checkout" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-xl w-full p-6 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="text-xl font-bold text-slate-900">ការទូទាត់ប្រាក់ (Checkout)</h3>
+                <button onclick="closeCheckoutModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="space-y-3">
+                <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">១. អាសយដ្ឋានដឹកជញ្ជូន</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="chk-name" placeholder="ឈ្មោះពេញ *" class="p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none">
+                    <input type="text" id="chk-phone" placeholder="លេខទូរស័ព្ទ *" class="p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none">
+                </div>
+                <input type="text" id="chk-address" placeholder="អាសយដ្ឋានផ្ទះ/ផ្លូវ/ខណ្ឌ/ខេត្ត *" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none">
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="space-y-3">
+                <h4 class="text-sm font-bold text-slate-700 uppercase tracking-wider">២. ជ្រើសរើសវិធីសាស្ត្រទូទាត់</h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <label class="border-2 border-brand-600 bg-brand-50/30 p-3 rounded-2xl cursor-pointer flex flex-col items-center justify-center gap-1 text-center" id="pay-opt-khqr">
+                        <input type="radio" name="payment" value="KHQR" checked onclick="selectPayOption('KHQR')" class="hidden">
+                        <span class="text-xs font-bold text-khqr">ABA KHQR</span>
+                        <i class="fa-solid fa-qrcode text-xl text-khqr"></i>
+                    </label>
+
+                    <label class="border-2 border-slate-200 p-3 rounded-2xl cursor-pointer flex flex-col items-center justify-center gap-1 text-center" id="pay-opt-card">
+                        <input type="radio" name="payment" value="CARD" onclick="selectPayOption('CARD')" class="hidden">
+                        <span class="text-xs font-bold text-slate-700">Card</span>
+                        <i class="fa-solid fa-credit-card text-xl text-slate-500"></i>
+                    </label>
+
+                    <label class="border-2 border-slate-200 p-3 rounded-2xl cursor-pointer flex flex-col items-center justify-center gap-1 text-center" id="pay-opt-cod">
+                        <input type="radio" name="payment" value="COD" onclick="selectPayOption('COD')" class="hidden">
+                        <span class="text-xs font-bold text-slate-700">COD</span>
+                        <i class="fa-solid fa-hand-holding-dollar text-xl text-emerald-600"></i>
+                    </label>
+                </div>
+            </div>
+
+            <!-- KHQR Display Dynamic Box -->
+            <div id="khqr-box" class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center space-y-2">
+                <p class="text-xs font-semibold text-slate-500">Scan QR Code ខាងក្រោមតាម ABA Mobile App:</p>
+                <div class="w-36 h-36 bg-white mx-auto border-2 border-khqr p-2 rounded-xl flex items-center justify-center shadow-inner">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=SoryaCommerceDynamicKHQR" alt="KHQR" class="w-full h-full">
+                </div>
+                <p class="text-xs text-slate-400">ប្រព័ន្ធនឹងផ្ទៀងផ្ទាត់ការទូទាត់ដោយស្វ័យប្រវត្តិ (Instant Auto Lock/Success)</p>
+            </div>
+
+            <button onclick="processOrderSubmit()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg shadow-emerald-600/30 transition-all">
+                បញ្ជាក់ការបញ្ជាទិញ (Confirm Order)
+            </button>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="modal-auth" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl relative">
+            <button onclick="toggleAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-xl font-bold text-slate-900 text-center">ចូលប្រើប្រាស់ (Sign In)</h3>
+
+            <div class="space-y-3">
+                <input type="email" id="login-email" placeholder="Email / Phone Number" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <input type="password" id="login-pass" placeholder="Password" class="w-full p-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-500/20 outline-none">
+                <button onclick="performLogin()" class="w-full py-2.5 rounded-xl bg-brand-600 text-white font-semibold text-sm shadow-md hover:bg-brand-700">ចូលប្រើ (Login)</button>
+            </div>
+
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-slate-200"></div>
+                <span class="flex-shrink mx-2 text-xs text-slate-400">ឬ (OR)</span>
+                <div class="flex-grow border-t border-slate-200"></div>
+            </div>
+
+            <div class="space-y-2">
+                <button onclick="performLogin('Google')" class="w-full py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-google text-rose-500"></i> Continue with Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT STATE & LOGIC ================= -->
+    <script>
+        // Data Models Mocking DB
+        const CATEGORIES = [
+            { id: 0, name: "ទាំងអស់ (All)", slug: "all" },
+            { id: 1, name: "អេឡិចត្រូនិក (Electronics)", slug: "electronics" },
+            { id: 2, name: "សំលៀកបំពាក់ (Fashion)", slug: "fashion" },
+            { id: 3, name: "សម្ភារៈផ្ទះ (Home)", slug: "home" }
+        ];
+
+        let PRODUCTS = [
+            { id: "p1", categoryId: 1, name: "iPhone 15 Pro Max 256GB", price: 1199, stock: 15, rating: 4.9, image: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500&q=80", desc: "បន្ទះឈីប A17 Pro, អេក្រង់ Super Retina XDR 6.7 អុីន ជាមួយ ProMotion" },
+            { id: "p2", categoryId: 1, name: "MacBook Air M3 15-inch", price: 1299, stock: 8, rating: 4.8, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&q=80", desc: "ស្ដើងបំផុត ថាមពលថ្មកាន់បាន ១៨ ម៉ោង រ៉េម 8GB / SSD 256GB" },
+            { id: "p3", categoryId: 2, name: "អាវយឺតដៃខ្លី Premium Cotton", price: 25, stock: 45, rating: 4.5, image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80", desc: "សាច់ក្រណាត់ទន់ល្មើយ មិនក្តៅ ងាយស្រួលពាក់ប្រចាំថ្ងៃ" },
+            { id: "p4", categoryId: 3, name: "កែវកាហ្វេស្មាត Smart Mug 2", price: 89, stock: 20, rating: 4.7, image: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&q=80", desc: "រក្សាកម្តៅកាហ្វេតាមសីតុណ្ហភាពដែលអ្នកចង់បានរហូតដល់ ១.៥ ម៉ោង" },
+            { id: "p5", categoryId: 1, name: "កាសឥតខ្សែ Sony WH-1000XM5", price: 349, stock: 12, rating: 4.9, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80", desc: "ប្រព័ន្ធការពារសំឡេងរំខាន Noise Cancelling ល្អបំផុត" },
+            { id: "p6", categoryId: 2, name: "ស្បែកជើងរត់ Nike Air Zoom", price: 135, stock: 3, rating: 4.6, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&q=80", desc: "ស្រាល យឺត និងគាំទ្របាតជើងបានយ៉ាងល្អ" }
+        ];
+
+        let ORDERS = [
+            { id: "ORD-9821", customer: "Sokha Chan", items: "iPhone 15 Pro Max (1)", total: 1199, payment: "KHQR", payStatus: "PAID", shipStatus: "Processing" },
+            { id: "ORD-9822", customer: "Bopha Bopha", items: "Nike Air Zoom (1)", total: 135, payment: "COD", payStatus: "PENDING", shipStatus: "Pending" }
+        ];
+
+        // Global State
+        let activeCategory = 0;
+        let cart = [];
+        let currentUser = null;
+        let currentAdminRole = 'admin'; // admin, manager, driver
+        let selectedPayMethod = 'KHQR';
+
+        // Init App
+        window.onload = function() {
+            renderCategoryPills();
+            renderProducts();
+            renderAdminOrders();
+            renderAdminInventory();
+            initSalesChart();
+        };
+
+        // Navigation Switcher
+        function switchMainTab(tab) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+
+            ['store', 'admin', 'db', 'docs'].forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                if (t === tab) {
+                    btn.className = "px-4 py-2 rounded-lg transition-all text-slate-700 bg-white shadow-sm font-semibold";
+                } else {
+                    btn.className = "px-4 py-2 rounded-lg transition-all text-slate-600 hover:text-slate-900";
+                }
+            });
+        }
+
+        // Render Categories Pills
+        function renderCategoryPills() {
+            const container = document.getElementById('category-pills');
+            container.innerHTML = CATEGORIES.map(c => `
+                <button onclick="selectCategory(${c.id})" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${activeCategory === c.id ? 'bg-brand-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+                    ${c.name}
+                </button>
+            `).join('');
+        }
+
+        function selectCategory(id) {
+            activeCategory = id;
+            renderCategoryPills();
+            filterProducts();
+        }
+
+        // Filter and Render Products Grid
+        function filterProducts() {
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const maxPrice = parseFloat(document.getElementById('price-range').value);
+            document.getElementById('price-range-val').innerText = `≤ $${maxPrice}`;
+            const sort = document.getElementById('sort-select').value;
+
+            let filtered = PRODUCTS.filter(p => {
+                const matchesCat = activeCategory === 0 || p.categoryId === activeCategory;
+                const matchesSearch = p.name.toLowerCase().includes(search);
+                const matchesPrice = p.price <= maxPrice;
+                return matchesCat && matchesSearch && matchesPrice;
+            });
+
+            if (sort === 'low-high') filtered.sort((a,b) => a.price - b.price);
+            if (sort === 'high-low') filtered.sort((a,b) => b.price - a.price);
+            if (sort === 'rating') filtered.sort((a,b) => b.rating - a.rating);
+
+            renderProducts(filtered);
+        }
+
+        function renderProducts(list = PRODUCTS) {
+            const grid = document.getElementById('product-grid');
+            if (list.length === 0) {
+                grid.innerHTML = `<div class="col-span-full py-12 text-center text-slate-400">មិនមានផលិតផលដែលស្វែងរកឡើយ</div>`;
+                return;
+            }
+
+            grid.innerHTML = list.map(p => `
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                    <div class="relative aspect-square overflow-hidden bg-slate-100">
+                        <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        <span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold text-slate-700 shadow-sm">
+                            <i class="fa-solid fa-star text-amber-400"></i> ${p.rating}
+                        </span>
+                        ${p.stock < 5 ? `<span class="absolute top-3 left-3 bg-rose-500 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">Low Stock</span>` : ''}
+                    </div>
+
+                    <div class="p-4 space-y-2 flex-grow flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm line-clamp-1">${p.name}</h3>
+                            <p class="text-xs text-slate-500 line-clamp-2 mt-1">${p.desc}</p>
+                        </div>
+
+                        <div class="pt-2 flex items-center justify-between border-t border-slate-100">
+                            <span class="text-lg font-extrabold text-brand-600">$${p.price.toFixed(2)}</span>
+                            <div class="flex gap-1">
+                                <button onclick="openProductModal('${p.id}')" class="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                                <button onclick="addToCart('${p.id}')" class="px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-sm flex items-center gap-1">
+                                    <i class="fa-solid fa-cart-plus"></i> បន្ថែម
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal Handlers
+        function openProductModal(id) {
+            const p = PRODUCTS.find(item => item.id === id);
+            const container = document.getElementById('modal-product-content');
+            container.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="rounded-2xl overflow-hidden bg-slate-100 aspect-square">
+                        <img src="${p.image}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="space-y-4 flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold text-brand-600 uppercase tracking-wider">In Stock: ${p.stock} pcs</span>
+                            <h2 class="text-2xl font-bold text-slate-900 mt-1">${p.name}</h2>
+                            <p class="text-2xl font-black text-brand-600 mt-2">$${p.price.toFixed(2)}</p>
+                            <p class="text-sm text-slate-600 mt-3">${p.desc}</p>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex gap-2">
+                                <span class="text-xs font-semibold text-slate-500">Variants:</span>
+                                <span class="px-2 py-0.5 rounded border border-brand-600 text-brand-600 text-xs font-bold">Standard</span>
+                            </div>
+                            <button onclick="addToCart('${p.id}'); closeProductModal();" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-md">
+                                បន្ថែមក្នុងកន្ត្រក (Add to Cart)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('modal-product').classList.remove('hidden');
+        }
+
+        function closeProductModal() { document.getElementById('modal-product').classList.add('hidden'); }
+
+        // Cart Functions
+        function addToCart(id) {
+            const prod = PRODUCTS.find(p => p.id === id);
+            const exist = cart.find(item => item.id === id);
+            if (exist) {
+                exist.qty += 1;
+            } else {
+                cart.push({ ...prod, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) {
+                    cart = cart.filter(i => i.id !== id);
+                }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const totalCount = cart.reduce((acc, item) => acc + item.qty, 0);
+            document.getElementById('cart-badge').innerText = totalCount;
+
+            const container = document.getElementById('cart-items-container');
+            if (cart.length === 0) {
+                container.innerHTML = `<div class="py-12 text-center text-slate-400 text-sm">កន្ត្រកទំនិញនៅទទេរឡើយ</div>`;
+            } else {
+                container.innerHTML = cart.map(i => `
+                    <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-100">
+                        <img src="${i.image}" class="w-14 h-14 object-cover rounded-lg">
+                        <div class="flex-grow">
+                            <h4 class="text-xs font-bold text-slate-800 line-clamp-1">${i.name}</h4>
+                            <span class="text-xs font-bold text-brand-600">$${(i.price * i.qty).toFixed(2)}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2 py-1">
+                            <button onclick="updateCartQty('${i.id}', -1)" class="text-xs text-slate-500 font-bold px-1">-</button>
+                            <span class="text-xs font-bold text-slate-800">${i.qty}</span>
+                            <button onclick="updateCartQty('${i.id}', 1)" class="text-xs text-slate-500 font-bold px-1">+</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+            document.getElementById('cart-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('cart-total').innerText = `$${subtotal.toFixed(2)}`;
+        }
+
+        function openCartModal() { document.getElementById('modal-cart').classList.remove('hidden'); }
+        function closeCartModal() { document.getElementById('modal-cart').classList.add('hidden'); }
+
+        function openCheckoutModal() {
+            if (cart.length === 0) {
+                alert("សូមបន្ថែមទំនិញក្នុងកន្ត្រកជាមុនសិន!");
+                return;
+            }
+            closeCartModal();
+            document.getElementById('modal-checkout').classList.remove('hidden');
+        }
+        function closeCheckoutModal() { document.getElementById('modal-checkout').classList.add('hidden'); }
+
+        function selectPayOption(type) {
+            selectedPayMethod = type;
+            ['khqr', 'card', 'cod'].forEach(t => {
+                const box = document.getElementById(`pay-opt-${t}`);
+                if (t === type.toLowerCase()) {
+                    box.className = "border-2 border-brand-600 bg-brand-50/30 p-3 rounded-2xl cursor-pointer flex flex-col items-center justify-center gap-1 text-center";
+                } else {
+                    box.className = "border-2 border-slate-200 p-3 rounded-2xl cursor-pointer flex flex-col items-center justify-center gap-1 text-center";
+                }
+            });
+
+            document.getElementById('khqr-box').style.display = type === 'KHQR' ? 'block' : 'none';
+        }
+
+        function processOrderSubmit() {
+            const name = document.getElementById('chk-name').value;
+            if (!name) {
+                alert("សូមបញ្ចូលឈ្មោះអតិថិជន!");
+                return;
+            }
+
+            const total = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            const newOrder = {
+                id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+                customer: name,
+                items: cart.map(i => `${i.name} (${i.qty})`).join(', '),
+                total: total,
+                payment: selectedPayMethod,
+                payStatus: selectedPayMethod === 'KHQR' ? 'PAID' : 'PENDING',
+                shipStatus: 'Pending'
+            };
+
+            ORDERS.unshift(newOrder);
+            cart = [];
+            updateCartUI();
+            closeCheckoutModal();
+            renderAdminOrders();
+
+            alert(`ការបញ្ជាទិញជោគជ័យ! Order ID: ${newOrder.id}`);
+        }
+
+        // Admin Role Switcher
+        function setAdminRole(role) {
+            currentAdminRole = role;
+            ['admin', 'manager', 'driver'].forEach(r => {
+                const btn = document.getElementById(`role-btn-${r}`);
+                if (r === role) {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-white shadow-sm text-brand-600";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600";
+                }
+            });
+
+            // RBAC Restrict Buttons Simulation
+            document.querySelectorAll('.btn-role-restricted').forEach(b => {
+                b.style.display = role === 'driver' ? 'none' : 'inline-flex';
+            });
+        }
+
+        function switchAdminSubTab(sub) {
+            ['orders', 'inventory', 'reports'].forEach(s => {
+                document.getElementById(`admin-subview-${s}`).classList.add('hidden');
+                document.getElementById(`admin-sub-${s}`).className = "pb-4 hover:text-slate-800";
+            });
+            document.getElementById(`admin-subview-${sub}`).classList.remove('hidden');
+            document.getElementById(`admin-sub-${sub}`).className = "pb-4 text-brand-600 border-b-2 border-brand-600";
+        }
+
+        function renderAdminOrders() {
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = ORDERS.map(o => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3 font-mono font-bold text-brand-600">${o.id}</td>
+                    <td class="p-3 font-semibold text-slate-800">${o.customer}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${o.payment === 'KHQR' ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-700'}">${o.payment}</span></td>
+                    <td class="p-3 font-bold">$${o.total.toFixed(2)}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${o.payStatus === 'PAID' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${o.payStatus}</span></td>
+                    <td class="p-3">
+                        <select onchange="updateShipStatus('${o.id}', this.value)" class="text-xs border border-slate-200 rounded px-2 py-1 font-semibold">
+                            <option value="Pending" ${o.shipStatus==='Pending'?'selected':''}>Pending</option>
+                            <option value="Processing" ${o.shipStatus==='Processing'?'selected':''}>Processing</option>
+                            <option value="Shipping" ${o.shipStatus==='Shipping'?'selected':''}>Shipping</option>
+                            <option value="Completed" ${o.shipStatus==='Completed'?'selected':''}>Completed</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-xs"><button class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-ellipsis-vertical"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function updateShipStatus(id, newStatus) {
+            const o = ORDERS.find(item => item.id === id);
+            if(o) o.shipStatus = newStatus;
+        }
+
+        function renderAdminInventory() {
+            const tbody = document.getElementById('inventory-table-body');
+            tbody.innerHTML = PRODUCTS.map(p => `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-3"><img src="${p.image}" class="w-10 h-10 object-cover rounded-lg"></td>
+                    <td class="p-3 font-bold text-slate-800">${p.name}</td>
+                    <td class="p-3 text-xs text-slate-500">${p.categoryId === 1 ? 'Electronics' : p.categoryId === 2 ? 'Fashion' : 'Home'}</td>
+                    <td class="p-3 font-bold text-brand-600">$${p.price.toFixed(2)}</td>
+                    <td class="p-3 font-semibold">${p.stock} pcs</td>
+                    <td class="p-3"><button onclick="deleteProduct('${p.id}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteProduct(id) {
+            PRODUCTS = PRODUCTS.filter(p => p.id !== id);
+            renderAdminInventory();
+            renderProducts();
+        }
+
+        function triggerTelegramAlert() {
+            alert("🔔 Telegram Bot Alert Sent:\n'New Order ORD-9821 received via ABA KHQR ($1,199.00)'");
+        }
+
+        function exportReport(type) {
+            alert(`បានទាញយករបាយការណ៍ជាឯកសារ ${type.toUpperCase()} ជោគជ័យ!`);
+        }
+
+        // Auth Simulation
+        function toggleAuthModal() { document.getElementById('modal-auth').classList.toggle('hidden'); }
+        function performLogin(provider = 'Email') {
+            currentUser = { name: provider === 'Google' ? 'Sokha Google' : 'Admin User' };
+            document.getElementById('user-name-display').innerText = currentUser.name;
+            toggleAuthModal();
+        }
+
+        function scrollToProducts() {
+            document.getElementById('product-section').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Analytics Chart Setup
+        function initSalesChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['01 Oct', '05 Oct', '10 Oct', '15 Oct', '20 Oct', '21 Oct'],
+                    datasets: [{
+                        label: 'Sales Revenue ($)',
+                        data: [1200, 1900, 3000, 2500, 4200, 5100],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
